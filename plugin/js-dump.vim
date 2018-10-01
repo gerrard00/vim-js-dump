@@ -1,5 +1,5 @@
 " TODO: if there is no visual selection we should just viw
-" TODO: allow undo of last added dump
+" TODO: allow undo of last added dump, even if not last action in vim
 " TODO: allow undo of all added dumps
 "
  " Only do this when not done yet for this buffer
@@ -42,22 +42,33 @@ function! s:find_semicolon()
   return foundLineNumber
 endfunction
 
-function! s:dumpSelection() range
-  echo 'range = ' . a:firstline . ',' . a:lastline
-  let expressionToDump = s:get_visual_selection()
-  let expressionToDisplay = strpart(expressionToDump, 0, 20)
+function! s:dump(expressionToDump) range
+  let expressionToDisplay = strpart(a:expressionToDump, 0, 20)
 
   let lineBeforeAppend = s:find_semicolon()
 
   call append(lineBeforeAppend, [
         \ '',
-        \ 'console.log(''***************<dump| ' . expressionToDisplay . '***************'');',
-        \ 'console.log(JSON.stringify(' . expressionToDump . '));',
-        \ 'console.log(''***************|dump> ' . expressionToDisplay . '***************'');',
+        \ 'console.log(''***************<dump| ' . expressionToDisplay . ' |dump>***************'');',
+        \ 'console.log(JSON.stringify(' . a:expressionToDump . '));',
+        \ 'console.log(''***************|dump> ' . expressionToDisplay . ' <dump|***************'');',
         \ ''
         \])
 endfunction
 
-command! -range JSDump :call s:dumpSelection()
+function! s:dumpCurrentWord() range
+  call s:dump(expand('<cword>'))
+endfunction
+
+function! s:dumpSelection() range
+  echo 'range = ' . a:firstline . ',' . a:lastline
+  let visualSelection = s:get_visual_selection()
+  call s:dump(visualSelection)
+endfunction
+
+command! -range JSDump :call s:dumpCurrentWord()
+command! -range JSDumpSelection :call s:dumpSelection()
+
 " this should be localleader
-vnoremap <Leader>du :JSDump<CR>
+nnoremap <Leader>du :JSDump<CR>
+vnoremap <Leader>du :JSDumpSelection<CR>
