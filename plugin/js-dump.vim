@@ -50,7 +50,7 @@ function! s:dump(expressionToDump) range
   call append(lineBeforeAppend, [
         \ '',
         \ 'console.log(''***************<dump| ' . expressionToDisplay . ' |dump>***************'');',
-        \ 'console.log(JSON.stringify(' . a:expressionToDump . '));',
+        \ 'console.log(JSON.stringify(' . a:expressionToDump . ', null, 2));',
         \ 'console.log(''***************|dump> ' . expressionToDisplay . ' <dump|***************'');',
         \ ''
         \])
